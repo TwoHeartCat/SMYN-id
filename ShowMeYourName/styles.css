@@ -1,0 +1,23 @@
+.vc-smyn-id,
+.vc-smyn-suffix {
+    color: var(--text-muted);
+    margin-left: 4px;
+    margin-right: 4px;
+    display: inline-block;
+}
+
+.vc-smyn-id::before,
+.vc-smyn-suffix::before {
+    content: "(";
+}
+
+.vc-smyn-id::after,
+.vc-smyn-suffix::after {
+    content: ")";
+}
+
+.vc-smyn-id + .vc-smyn-suffix,
+.vc-smyn-suffix + .vc-smyn-id {
+    margin-left: 0;
+    margin-right: 0;
+}
