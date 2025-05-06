@@ -31,9 +31,9 @@ const settings = definePluginSettings({
             { label: "Id then nickname and username", value: "id-nick-user" },
             { label: "Username then id and nickname", value: "user-id-nick", default: true },
             { label: "Nickname then id and username", value: "nick-id-user" },
-            { label: "Username then id", value: "user-id", default: true },
             { label: "Username then nickname", value: "user-nick", default: true },
             { label: "Nickname then username", value: "nick-user" },
+            { label: "Username then id", value: "user-id", default: true },
             { label: "Id then username", value: "id-user" },
             { label: "Username only", value: "user" },
         ],
@@ -70,6 +70,8 @@ export default definePlugin({
         try {
             const user = userOverride ?? message.author;
             let { username, id } = user;
+
+            // If "displayNames" is enabled, globalName is used instead of username
             if (settings.store.displayNames)
                 username = (user as any).globalName || username;
 
@@ -78,10 +80,14 @@ export default definePlugin({
 
             const userIdDisplay = <span className="vc-smyn-id">{id}</span>;
 
-            if (isRepliedMessage && !settings.store.inReplies || username.toLowerCase() === nick.toLowerCase())
+            // If this is a reply message and "inReplies" is disabled, we do not format
+            if (isRepliedMessage && !settings.store.inReplies) {
+                return <>{author?.nick}</>;
+            }
 
-                if (settings.store.mode === "user-id")
-                    return <>{prefix}{username}{userIdDisplay}</>;
+            // Determine which format to use based on the "mode" parameter
+            if (settings.store.mode === "user-id")
+                return <>{prefix}{username}{userIdDisplay}</>;
 
             if (settings.store.mode === "nick-user-id")
                 return <>{prefix}{nick}<span className="vc-smyn-suffix">{username}</span>{userIdDisplay}</>;
@@ -110,8 +116,10 @@ export default definePlugin({
             if (settings.store.mode === "user-nick-id")
                 return <>{prefix}{username}<span className="vc-smyn-suffix">{nick}</span>{userIdDisplay}</>;
 
-            return <>{prefix}{username}{userIdDisplay}</>;
-        } catch {
+            // By default, display username
+            return <>{prefix}{username}</>;
+        } catch (error) {
+            console.error("Erreur dans renderUsername", error);
             return <>{author?.nick}</>;
         }
     }, { noop: true }),
